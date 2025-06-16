@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Визуализация кучи</title>
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --primary-hover: #3a5a8c;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        
+        h1, h2, h3 {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 30px;
+            background-color: #fff;
+            box-shadow: var(--box-shadow);
+            border-radius: var(--border-radius);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid var(--primary-color);
+            position: relative;
+        }
+        
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        
+        .logo {
+            max-height: 80px;
+            margin-bottom: 10px;
+        }
+        
+        .header h1 {
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            color: var(--primary-color);
+        }
+        
+        .header p {
+            color: var(--secondary-color);
+            font-size: 1.1rem;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            padding: 25px;
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+        }
+        
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .section h2 {
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+            align-items: center;
+        }
+        
+        input, select {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            flex-grow: 1;
+            min-width: 200px;
+            transition: var(--transition);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.25);
+        }
+        
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            font-weight: 500;
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            white-space: pre-wrap;
+            font-size: 14px;
+            line-height: 1.5;
+            border: 1px solid #eee;
+        }
+        
+        .message {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border-left: 5px solid var(--success-color);
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-left: 5px solid var(--danger-color);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: var(--box-shadow);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+        
+        table, th, td {
+            border: 1px solid #eee;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        tr:hover {
+            background-color: #e9ecef;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            background-color: #f8f9fa;
+            border: none;
+            border-bottom: 3px solid transparent;
+            margin-right: 10px;
+            font-weight: 500;
+            transition: var(--transition);
+            color: var(--secondary-color);
+        }
+        
+        .tab:hover {
+            background-color: #e9ecef;
+            color: var(--primary-color);
+        }
+        
+        .tab.active {
+            background-color: #fff;
+            border-bottom: 3px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: var(--border-radius);
+            background-color: #fff;
+            animation: fadeIn 0.5s;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        #sortResult {
+            margin-top: 25px;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: var(--border-radius);
+            background-color: #f8f9fa;
+        }
+        
+        #sortResult h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                margin: 15px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            input, select, button {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .tabs {
+                flex-wrap: wrap;
+            }
+            
+            .tab {
+                flex-grow: 1;
+                text-align: center;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                <img src="/static/мисос.png" alt="Эмблема МИСИС" class="logo">
+            </div>
+            <h1>Визуализация кучи</h1>
+            <p>Курсовая работа: "Кучи. Представления кучи в компьютере, алгоритм окучивания массива"</p>
+        </div>
+        
+        <div class="section">
+            <h2>Управление кучей</h2>
+            <div class="controls">
+                <input type="number" id="valueInput" placeholder="Введите число">
+                <button onclick="insertValue()">Вставить</button>
+                <button onclick="extractRoot()">Извлечь корень</button>
+                <button onclick="clearHeap()">Очистить</button>
+                <button onclick="changeHeapType()">Изменить тип кучи</button>
+            </div>
+            
+            <div class="controls">
+                <input type="text" id="arrayInput" placeholder="Введите числа через запятую (например: 5,3,8,1,9)">
+                <button onclick="buildFromArray()">Создать кучу из массива</button>
+            </div>
+            
+            <div id="message" class="message" style="display: none;"></div>
+        </div>
+        
+        <div class="section">
+            <h2>Текущее состояние кучи: <span id="heapType">{{.Type}}</span></h2>
+            
+            <div class="tabs">
+                <div class="tab active" onclick="openTab(event, 'treeTab')">Представление в виде дерева</div>
+                <div class="tab" onclick="openTab(event, 'arrayTab')">Представление в виде массива</div>
+                <div class="tab" onclick="openTab(event, 'relationshipsTab')">Связи между узлами</div>
+            </div>
+            
+            <div id="treeTab" class="tab-content active">
+                <pre id="treeView">{{.TreeView}}</pre>
+            </div>
+            
+            <div id="arrayTab" class="tab-content">
+                <pre id="arrayView">{{.ArrayView}}</pre>
+            </div>
+            
+            <div id="relationshipsTab" class="tab-content">
+                <pre id="relationships">{{.Relationships}}</pre>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Сортировка кучей</h2>
+            <div class="controls">
+                <input type="text" id="sortArrayInput" placeholder="Введите числа через запятую">
+                <select id="sortOrder">
+                    <option value="asc">По возрастанию</option>
+                    <option value="desc">По убыванию</option>
+                </select>
+                <button onclick="sortArray()">Сортировать</button>
+            </div>
+            
+            <div id="sortResult" style="display: none;">
+                <h3>Результат сортировки:</h3>
+                <div>
+                    <strong>Исходный массив:</strong>
+                    <pre id="originalArray"></pre>
+                </div>
+                <div>
+                    <strong>Отсортированный массив:</strong>
+                    <pre id="sortedArray"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Функция для вставки значения в кучу
+        function insertValue() {
+            const valueInput = document.getElementById('valueInput');
+            const value = parseInt(valueInput.value);
+            
+            if (isNaN(value)) {
+                showMessage('Пожалуйста, введите корректное число', 'error');
+                return;
+            }
+            
+            fetch('/api/heap', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    operation: 'insert',
+                    value: value
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateHeapVisualization(data);
+                    showMessage(data.message, 'success');
+                } else {
+                    showMessage(data.message, 'error');
+                }
+                valueInput.value = '';
+            })
+            .catch(error => {
+                showMessage('Ошибка: ' + error, 'error');
+            });
+        }
+        
+        // Функция для извлечения корня из кучи
+        function extractRoot() {
+            fetch('/api/heap', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    operation: 'extract',
+                    value: 0
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateHeapVisualization(data);
+                    showMessage(data.message, 'success');
+                } else {
+                    showMessage(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                showMessage('Ошибка: ' + error, 'error');
+            });
+        }
+        
+        // Функция для очистки кучи
+        function clearHeap() {
+            fetch('/api/heap', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    operation: 'clear',
+                    value: 0
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateHeapVisualization(data);
+                    showMessage(data.message, 'success');
+                } else {
+                    showMessage(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                showMessage('Ошибка: ' + error, 'error');
+            });
+        }
+        
+        // Функция для изменения типа кучи
+        function changeHeapType() {
+            fetch('/api/heap', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    operation: 'changeType',
+                    value: 0
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateHeapVisualization(data);
+                    showMessage(data.message, 'success');
+                    
+                    // Обновляем отображаемый тип кучи
+                    const heapType = document.getElementById('heapType');
+                    heapType.textContent = data.message.includes('максимальную') ? 'Максимальная куча' : 'Минимальная куча';
+                } else {
+                    showMessage(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                showMessage('Ошибка: ' + error, 'error');
+            });
+        }
+        
+        // Функция для создания кучи из массива
+        function buildFromArray() {
+            const arrayInput = document.getElementById('arrayInput');
+            const arrayStr = arrayInput.value;
+            
+            if (!arrayStr.trim()) {
+                showMessage('Пожалуйста, введите числа через запятую', 'error');
+                return;
+            }
+            
+            fetch('/api/heap', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    operation: 'buildFromArray',
+                    value: arrayStr
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateHeapVisualization(data);
+                    showMessage(data.message, 'success');
+                } else {
+                    showMessage(data.message, 'error');
+                }
+                arrayInput.value = '';
+            })
+            .catch(error => {
+                showMessage('Ошибка: ' + error, 'error');
+            });
+        }
+        
+        // Функция для сортировки массива
+        function sortArray() {
+            const sortArrayInput = document.getElementById('sortArrayInput');
+            const sortOrder = document.getElementById('sortOrder');
+            const arrayStr = sortArrayInput.value;
+            
+            if (!arrayStr.trim()) {
+                showMessage('Пожалуйста, введите числа через запятую', 'error');
+                return;
+            }
+            
+            // Преобразуем строку в массив чисел
+            const array = arrayStr.split(',').map(item => parseInt(item.trim())).filter(item => !isNaN(item));
+            
+            if (array.length === 0) {
+                showMessage('Пожалуйста, введите корректные числа через запятую', 'error');
+                return;
+            }
+            
+            fetch('/api/sort', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    array: array,
+                    order: sortOrder.value
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Отображаем результат сортировки
+                    document.getElementById('originalArray').textContent = JSON.stringify(data.originalArray);
+                    document.getElementById('sortedArray').textContent = JSON.stringify(data.sortedArray);
+                    document.getElementById('sortResult').style.display = 'block';
+                    showMessage('Массив успешно отсортирован', 'success');
+                } else {
+                    showMessage('Ошибка сортировки: ' + data.error, 'error');
+                }
+            })
+            .catch(error => {
+                showMessage('Ошибка: ' + error, 'error');
+            });
+        }
+        
+        // Функция для обновления визуализации кучи
+        function updateHeapVisualization(data) {
+            document.getElementById('treeView').textContent = data.treeView;
+            document.getElementById('arrayView').textContent = data.arrayView;
+            document.getElementById('relationships').textContent = data.relationships;
+        }
+        
+        // Функция для отображения сообщения
+        function showMessage(message, type) {
+            const messageElement = document.getElementById('message');
+            messageElement.textContent = message;
+            messageElement.className = 'message ' + type;
+            messageElement.style.display = 'block';
+            
+            // Скрываем сообщение через 5 секунд
+            setTimeout(() => {
+                messageElement.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Функция для переключения вкладок
+        function openTab(evt, tabName) {
+            // Скрываем все содержимое вкладок
+            const tabContents = document.getElementsByClassName('tab-content');
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove('active');
+            }
+            
+            // Удаляем активный класс со всех вкладок
+            const tabs = document.getElementsByClassName('tab');
+            for (let i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove('active');
+            }
+            
+            // Показываем текущую вкладку и добавляем активный класс
+            document.getElementById(tabName).classList.add('active');
+            evt.currentTarget.classList.add('active');
+        }
+    </script>
+</body>
+</html>
